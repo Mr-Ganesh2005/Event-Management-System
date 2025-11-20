@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Event Scheduler</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f2f5;
+            display: flex;
+            justify-content: center;
+            padding-top: 30px;
+        }
+        .container {
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            width: 300px;
+        }
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+        label {
+            display: block;
+            margin: 10px 0 5px;
+        }
+        input, select, button {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 15px;
+            border-radius: 4px;
+            border: 1px solid #ccc;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            border: none;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        #result {
+            background-color: #e9ecef;
+            padding: 10px;
+            border-radius: 4px;
+            color: #333;
+            margin-top: 15px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Event Scheduler</h1>
+        <form id="eventForm">
+            <label for="eventName">Event Name:</label>
+            <input type="text" id="eventName" required>
+            <label for="startTime">Start Time (HH:MM):</label>
+            <input type="text" id="startTime" placeholder="HH:MM" required>
+            <label for="endTime">End Time (HH:MM):</label>
+            <input type="text" id="endTime" placeholder="HH:MM" required>
+            <label for="venue">Venue:</label>
+            <select id="venue" required>
+                <option value="">Select a venue</option>
+                <option value="Auditorium">Auditorium</option>
+                <option value="Conference Hall">Conference Hall</option>
+                <option value="Seminar Room">Seminar Room</option>
+            </select>
+            <button type="submit">Add Event</button>
+        </form>
+        <div id="result"></div>
+    </div>
+
+    <script>
+        document.getElementById('eventForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const eventName = document.getElementById('eventName').value;
+            const startTime = document.getElementById('startTime').value;
+            const endTime = document.getElementById('endTime').value;
+            const venue = document.getElementById('venue').value;
+
+            fetch('/schedule_event', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ eventName, startTime, endTime, venue })
+            })
+            .then(response => response.json())
+            .then(data => {
+                const resultDiv = document.getElementById('result');
+                if (data.error) {
+                    resultDiv.innerHTML = `Error: ${data.error}`;
+                } else {
+                    const timetable = data.timetable.map(e =>
+                        `${e.eventName}: ${e.startTime} - ${e.endTime} at ${e.venue}`
+                    ).join('<br>');
+                    resultDiv.innerHTML = `<strong>Scheduled Events:</strong><br>${timetable}`;
+                }
+            })
+            .catch(err => console.error(err));
+        });
+    </script>
+</body>
+</html>
